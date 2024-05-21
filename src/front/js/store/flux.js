@@ -2,6 +2,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
 			message: null,
+			token: null,
+			user: null,
+
 			demo: [
 				{
 					title: "FIRST",
@@ -46,7 +49,29 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 				//reset the global store
 				setStore({ demo: demo });
-			}
+			},
+			signup: async (email, password, confirmPassword) => {
+				try {
+					if (password !== confirmPassword) {
+						throw new Error('Passwords do not match');
+						return;
+					}
+
+					const resp = await fetch(process.env.BACKEND_URL + "/api/signup", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify({ email:email, password:password})
+					});
+					const data = await resp.json();
+					setStore({ token: data.token, user: data.user });
+					return data;
+				} catch (error) {
+					console.error('Signup error:', error.response.data);
+					// Handle errors (e.g., show error message)
+				}
+			},
 		}
 	};
 };
